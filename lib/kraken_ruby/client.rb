@@ -1,6 +1,6 @@
 require 'httparty'
 require 'hashie'
-require 'Base64'
+require 'base64' # <--- had to change this from "require 'Base64'"; getting "load error"
 require 'addressable/uri'
 
 
