@@ -1,3 +1,4 @@
+spec/kraken_key.rb
 .project
 *.gem
 Gemfile.lock
