@@ -80,8 +80,8 @@ module Kraken
     ##### Private Data ###
     ######################
 
-    def balance(opts={})
-      post_private 'Balance', opts
+    def balance#(opts={})
+      post_private 'Balance', {} #opts
     end
 
     def trade_balance(opts={})

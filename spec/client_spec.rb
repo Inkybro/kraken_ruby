@@ -278,17 +278,19 @@ describe Kraken::Client do
   context "fetching private data" do # More tests to come
     context "using balance()" do
       context "given no input" do
-        it "gets the user's balance" do
+        it "gets the user's balance(s)" do
           expect(kraken.balance).to be_instance_of(Hash)
         end
       end
       
-      context "given valid input" do
-        
-      end
-      
-      context "given invalid input" do
-        
+      context "given any input" do
+        # although the API doc says that you are able to specify
+        # 'asset' (base asset used to determine balance, default ZUSD),
+        # it seems not to make any difference, so for now, I'm just going
+        # entirely disable passing arguments.
+        it "throws an ArgumentError exception" do
+          expect { kraken.balance({:asset => 'XLTCXXDG'}) }.to raise_error(ArgumentError)
+        end
       end
     end  
   end
