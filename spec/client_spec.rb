@@ -4,12 +4,15 @@ require 'kraken_key'
 describe Kraken::Client do
 
   before :each do
-    # FIXME: perhaps it would be wiser or make more sense to implement
-    # this sleep within the actual library -- just not sure if that is
-    # a desired default behavior or if it's something that maybe should 
-    # be left up to the developer using the library
+    # I moved this sleep into the post_private() method of the Client
+    # class, because in an actual production scenario, using the library
+    # would, in some cases, suffer the same problem that I guess you
+    # were suffering here (EAPI:InvalidNonce). So, the fix should be
+    # applied over the entire library, not only during spec runs.
+    # Additionally, it makes the spec suite run MUCH faster, since
+    # a nonce is not necessary for public requests.
     
-    sleep 0.3 # to prevent rapidly pinging the Kraken server
+    #sleep 0.3 # to prevent rapidly pinging the Kraken server
   end
 
   let(:kraken){ Kraken::Client.new(API_KEY, API_SECRET) }
@@ -278,7 +281,7 @@ describe Kraken::Client do
   context "fetching private data" do # More tests to come
     context "using balance()" do
       context "given no input" do
-        it "gets the user's balance(s)" do
+        it "gets the user's balance(s) in ZUSD" do
           expect(kraken.balance).to be_instance_of(Hash)
         end
       end
@@ -290,6 +293,33 @@ describe Kraken::Client do
         # entirely disable passing arguments.
         it "throws an ArgumentError exception" do
           expect { kraken.balance({:asset => 'XLTCXXDG'}) }.to raise_error(ArgumentError)
+        end
+      end
+    end
+    
+    context "using trade_balance()" do
+      context "given no input" do
+        it "gets the user's trade balance(s) in ZUSD" do
+          expect(kraken.trade_balance).to be_instance_of(Hash)
+        end
+      end
+      
+      context "given valid input" do
+        it "gets the user's trade balance(s) in the specified asset" do
+          zusd = kraken.trade_balance
+          expect(zusd).to be_instance_of(Hash)
+          xxdg = kraken.trade_balance('XXDG')
+          expect(xxdg).to be_instance_of(Hash)
+          expect(zusd).not_to eq xxdg
+        end
+      end
+      
+      context "given invalid input" do
+        it "throws an ArgumentError exception" do
+          expect { kraken.trade_balance(1234) }.to raise_error(ArgumentError)
+          expect { kraken.trade_balance(1234.56) }.to raise_error(ArgumentError)
+          expect { kraken.trade_balance({}) }.to raise_error(ArgumentError)
+          expect { kraken.trade_balance([]) }.to raise_error(ArgumentError)
         end
       end
     end  

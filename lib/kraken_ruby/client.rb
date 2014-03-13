@@ -84,7 +84,11 @@ module Kraken
       post_private 'Balance', {} #opts
     end
 
-    def trade_balance(opts={})
+    def trade_balance(assets=nil, opts={})
+      if assets
+        raise ArgumentError if !assets.is_a?(String)
+        opts[:asset] = assets
+      end
       post_private 'TradeBalance', opts
     end
 
@@ -144,6 +148,8 @@ module Kraken
     private
 
       def post_private(method, opts={})
+        sleep 0.3
+        
         opts['nonce'] = nonce
         post_data = encode_options(opts)
 
