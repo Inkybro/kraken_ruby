@@ -31,6 +31,16 @@ And then execute:
 Or install it yourself as:
 
     $ gem install kraken_ruby
+    
+Alternatively, if you're looking to contribute to kracken_ruby, you can fork the repo and clone it.
+
+## Testing
+
+If you are doing development on the kracken_ruby codebase, you can run the tests by running from the root directory of the source code:
+
+	$ rspec
+	
+Please note that all tests for the *private* aspects of Kracken's API require a valid keypair. In order for those tests to pass, the keypair **must** be specified in the ```spec/kraken_key.rb``` file.
 
 ## Usage
 
