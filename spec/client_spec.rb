@@ -13,49 +13,229 @@ describe Kraken::Client do
   end
 
   let(:kraken){ Kraken::Client.new(API_KEY, API_SECRET) }
-
-  context "public data" do
-    it "gets the proper server time" do
-      kraken_time = DateTime.parse(kraken.server_time.rfc1123)
-      utc_time = Time.now.getutc
-      expect(kraken_time.day).to eq utc_time.day
-      expect(kraken_time.hour).to eq utc_time.hour
+  
+  context "fetching public data" do
+    context "using server_time()" do
+      it "gets the correct time from Kraken" do
+        # testing day vs day probably wouldn't ever really be an 
+        # issue, nor hour vs hour, but it is POSSIBLE.
+        # im assuming that this is why we weren't testing vs minute/second.
+        # perhaps calculating a time difference in seconds is
+        # a more reliable approach. 
+        result = Time.parse(kraken.server_time.rfc1123)
+        time_difference_in_seconds = (result-Time.now.getutc).abs
+        time_difference_in_seconds.should be < 3
+      end
     end
-
-    it "gets list of tradeable assets" do
-      expect(kraken.assets).to respond_to :XLTC
+    
+    context "using assets()" do
+      context "given no input" do
+        it "gets a list of all tradeable assets" do
+          result = kraken.assets
+          expect(result).to respond_to :XLTC
+          expect(result).to respond_to :XNMC
+          expect(result).to respond_to :XXBT
+          expect(result).to respond_to :XXDG
+          expect(result).to respond_to :XXRP
+          expect(result).to respond_to :XXVN
+          expect(result).to respond_to :ZEUR
+          expect(result).to respond_to :ZGBP
+          expect(result).to respond_to :ZKRW
+          expect(result).to respond_to :ZUSD
+        end
+      end
+      
+      context "given valid input" do
+        it "gets a list of the specified assets" do
+          result = kraken.assets('XLTC, XXDG')
+          expect(result).to respond_to :XLTC
+          expect(result).to respond_to :XXDG
+          expect(result).not_to respond_to :XNMC
+          expect(result).not_to respond_to :XXBT
+          expect(result).not_to respond_to :XXRP
+          expect(result).not_to respond_to :XXVN
+          expect(result).not_to respond_to :ZEUR
+          expect(result).not_to respond_to :ZGBP
+          expect(result).not_to respond_to :ZKRW
+          expect(result).not_to respond_to :ZUSD
+        end
+      end
+      
+      context "given invalid input" do
+        it "throws an expection" do
+          expect { kraken.assets(1234) }.to raise_error(ArgumentError)
+          expect { kraken.assets(1234.56) }.to raise_error(ArgumentError)
+          expect { kraken.assets({}) }.to raise_error(ArgumentError)
+          expect { kraken.assets([]) }.to raise_error(ArgumentError)
+        end
+      end
     end
-
-    it "gets list of asset pairs" do
-      expect(kraken.asset_pairs).to respond_to :XLTCXXDG
+    
+    context "using asset_pairs()" do
+      context "given no input" do
+        it "gets a list of all asset pairs" do
+          result = kraken.asset_pairs
+          expect(result).to respond_to :XLTCXXDG
+          expect(result).to respond_to :XLTCXXRP
+          expect(result).to respond_to :XLTCZEUR
+          expect(result).to respond_to :XLTCZKRW
+          expect(result).to respond_to :XLTCZUSD
+          expect(result).to respond_to :XNMCXXDG
+          expect(result).to respond_to :XNMCXXRP
+          expect(result).to respond_to :XNMCZEUR
+          expect(result).to respond_to :XNMCZKRW
+          expect(result).to respond_to :XNMCZUSD
+          expect(result).to respond_to :XXBTXLTC
+          expect(result).to respond_to :XXBTXNMC
+          expect(result).to respond_to :XXBTXXDG
+          expect(result).to respond_to :XXBTXXRP
+          expect(result).to respond_to :XXBTXXVN
+          expect(result).to respond_to :XXBTZEUR
+          expect(result).to respond_to :XXBTZKRW
+          expect(result).to respond_to :XXBTZUSD
+          expect(result).to respond_to :XXVNXXRP
+          expect(result).to respond_to :ZEURXXDG
+          expect(result).to respond_to :ZEURXXRP
+          expect(result).to respond_to :ZEURXXVN
+          expect(result).to respond_to :ZKRWXXRP
+          expect(result).to respond_to :ZUSDXXDG
+          expect(result).to respond_to :ZUSDXXRP
+          expect(result).to respond_to :ZUSDXXVN
+        end
+      end
+      
+      context "given valid input" do
+        it "gets a list of the specified asset pairs" do
+          result = kraken.asset_pairs('XLTCXXDG, XLTCXXRP')
+          expect(result).to respond_to :XLTCXXDG
+          expect(result).to respond_to :XLTCXXRP
+          expect(result).not_to respond_to :XLTCZEUR
+          expect(result).not_to respond_to :XLTCZKRW
+          expect(result).not_to respond_to :XLTCZUSD
+          expect(result).not_to respond_to :XNMCXXDG
+          expect(result).not_to respond_to :XNMCXXRP
+          expect(result).not_to respond_to :XNMCZEUR
+          expect(result).not_to respond_to :XNMCZKRW
+          expect(result).not_to respond_to :XNMCZUSD
+          expect(result).not_to respond_to :XXBTXLTC
+          expect(result).not_to respond_to :XXBTXNMC
+          expect(result).not_to respond_to :XXBTXXDG
+          expect(result).not_to respond_to :XXBTXXRP
+          expect(result).not_to respond_to :XXBTXXVN
+          expect(result).not_to respond_to :XXBTZEUR
+          expect(result).not_to respond_to :XXBTZKRW
+          expect(result).not_to respond_to :XXBTZUSD
+          expect(result).not_to respond_to :XXVNXXRP
+          expect(result).not_to respond_to :ZEURXXDG
+          expect(result).not_to respond_to :ZEURXXRP
+          expect(result).not_to respond_to :ZEURXXVN
+          expect(result).not_to respond_to :ZKRWXXRP
+          expect(result).not_to respond_to :ZUSDXXDG
+          expect(result).not_to respond_to :ZUSDXXRP
+          expect(result).not_to respond_to :ZUSDXXVN
+        end
+      end
+      
+      context "given invalid input" do
+        it "throws an expection" do
+          expect { kraken.asset_pairs(1234) }.to raise_error(ArgumentError)
+          expect { kraken.asset_pairs(1234.56) }.to raise_error(ArgumentError)
+          expect { kraken.asset_pairs({}) }.to raise_error(ArgumentError)
+          expect { kraken.asset_pairs([]) }.to raise_error(ArgumentError)
+        end
+      end
     end
-
-    it "gets public ticker data for given asset pairs" do
-      result = kraken.ticker('XLTCXXDG, ZEURXXDG')
-      expect(result).to respond_to :XLTCXXDG
-      expect(result).to respond_to :ZEURXXDG
+    
+    context "using ticker()" do
+      context "given no input" do
+        
+      end
+      
+      context "given valid input" do
+        it "gets public ticker data for given asset pairs" do
+          result = kraken.ticker('XLTCXXDG, ZEURXXDG')
+          expect(result).to respond_to :XLTCXXDG
+          expect(result).to respond_to :ZEURXXDG
+        end
+      end
+      
+      context "given invalid input" do
+        
+      end
     end
-
-    it "gets order book data for a given asset pair" do
-      order_book = kraken.order_book('XLTCXXDG')
-      expect(order_book.XLTCXXDG).to respond_to :asks
+    
+    context "using order_book()" do
+      context "given no input" do
+        
+      end
+      
+      context "given valid input" do
+        it "gets order book data for a given asset pair" do
+          result = kraken.order_book('XLTCXXDG')
+          expect(result).to respond_to :XLTCXXDG
+          expect(result.XLTCXXDG).to respond_to :asks
+          expect(result.XLTCXXDG).to respond_to :bids
+        end
+      end
+      
+      context "given invalid input" do
+        
+      end
     end
-
-    it "gets an array of trades data for a given asset pair" do
-      trades = kraken.trades('XLTCXXDG')
-      expect(trades.XLTCXXDG).to be_instance_of(Array)
+    
+    context "using trades()" do
+      context "given no input" do
+        
+      end
+      
+      context "given valid input" do
+        it "gets an array of trades data for a given asset pair" do
+          result = kraken.trades('XLTCXXDG')
+          expect(result).to respond_to :XLTCXXDG
+          expect(result.XLTCXXDG).to be_instance_of(Array)
+        end
+      end
+      
+      context "given invalid input" do
+        
+      end
     end
-
-    it "gets an array of spread data for a given asset pair" do
-      spread = kraken.spread('XLTCXXDG')
-      expect(spread.XLTCXXDG).to be_instance_of(Array)
+    
+    context "using spread()" do
+      context "given no input" do
+        
+      end
+      
+      context "given valid input" do
+        it "gets an array of spread data for a given asset pair" do
+          result = kraken.spread('XLTCXXDG')
+          expect(result).to respond_to :XLTCXXDG
+          expect(result.XLTCXXDG).to be_instance_of(Array)
+        end
+      end
+      
+      context "given invalid input" do
+        
+      end
     end
   end
 
-  context "private data" do # More tests to come    
-    it "gets the user's balance" do
-      expect(kraken.balance).to be_instance_of(Hash)
-    end
+  context "fetching private data" do # More tests to come
+    context "using balance()" do
+      context "given no input" do
+        it "gets the user's balance" do
+          expect(kraken.balance).to be_instance_of(Hash)
+        end
+      end
+      
+      context "given valid input" do
+        
+      end
+      
+      context "given invalid input" do
+        
+      end
+    end  
   end
 
 end
