@@ -39,26 +39,33 @@ module Kraken
       get_public 'AssetPairs', opts
     end
 
-    def ticker(asset_pairs=nil, opts={}) # takes string of comma delimited pairs
-      if asset_pairs
-        raise ArgumentError if !asset_pairs.is_a?(String)
-        opts[:pair] = asset_pairs
-      end
+    def ticker(asset_pairs, opts={}) # takes string of comma delimited pairs
+      raise ArgumentError if !asset_pairs.is_a?(String)
+      opts[:pair] = asset_pairs
       get_public 'Ticker', opts
     end
     
-    def order_book(pair, opts={})
-      opts['pair'] = pair
+    def ohlc(asset_pairs, opts={})
+      raise ArgumentError if !asset_pairs.is_a?(String)
+      opts[:pair] = asset_pairs
+      get_public 'OHLC', opts
+    end
+    
+    def order_book(asset_pairs, opts={})
+      raise ArgumentError if !asset_pairs.is_a?(String)
+      opts[:pair] = asset_pairs
       get_public 'Depth', opts
     end
 
-    def trades(pair, opts={})
-      opts['pair'] = pair
+    def trades(asset_pairs, opts={})
+      raise ArgumentError if !asset_pairs.is_a?(String)
+      opts[:pair] = asset_pairs
       get_public 'Trades', opts
     end
 
-    def spread(pair, opts={})
-      opts['pair'] = pair
+    def spread(asset_pairs, opts={})
+      raise ArgumentError if !asset_pairs.is_a?(String)
+      opts[:pair] = asset_pairs
       get_public 'Spread', opts
     end
 

@@ -62,7 +62,7 @@ describe Kraken::Client do
       end
       
       context "given invalid input" do
-        it "throws an expection" do
+        it "throws an ArgumentError exception" do
           expect { kraken.assets(1234) }.to raise_error(ArgumentError)
           expect { kraken.assets(1234.56) }.to raise_error(ArgumentError)
           expect { kraken.assets({}) }.to raise_error(ArgumentError)
@@ -137,7 +137,7 @@ describe Kraken::Client do
       end
       
       context "given invalid input" do
-        it "throws an expection" do
+        it "throws an ArgumentError exception" do
           expect { kraken.asset_pairs(1234) }.to raise_error(ArgumentError)
           expect { kraken.asset_pairs(1234.56) }.to raise_error(ArgumentError)
           expect { kraken.asset_pairs({}) }.to raise_error(ArgumentError)
@@ -148,7 +148,9 @@ describe Kraken::Client do
     
     context "using ticker()" do
       context "given no input" do
-        
+        it "throws an ArgumentError exception" do
+          expect { kraken.ticker }.to raise_error(ArgumentError)
+        end
       end
       
       context "given valid input" do
@@ -160,13 +162,47 @@ describe Kraken::Client do
       end
       
       context "given invalid input" do
-        
+        it "throws an ArgumentError exception" do
+          expect { kraken.ticker(1234) }.to raise_error(ArgumentError)
+          expect { kraken.ticker(1234.56) }.to raise_error(ArgumentError)
+          expect { kraken.ticker({}) }.to raise_error(ArgumentError)
+          expect { kraken.ticker([]) }.to raise_error(ArgumentError)
+        end
+      end
+    end
+    
+    context "using ohlc()" do
+      context "given no input" do
+        it "throws an ArgumentError exception" do
+          expect { kraken.ohlc }.to raise_error(ArgumentError)
+        end
+      end
+      
+      context "given valid input" do
+        it "gets order book data for a given asset pair" do
+          result = kraken.ohlc('XLTCXXDG')
+          expect(result).to respond_to :XLTCXXDG
+          expect(result.XLTCXXDG).to be_instance_of(Array)
+          expect(result).to respond_to :last
+          #expect(result.last).to be_instance_of(Fixnum)
+        end
+      end
+      
+      context "given invalid input" do
+        it "throws an ArgumentError exception" do
+          expect { kraken.ohlc(1234) }.to raise_error(ArgumentError)
+          expect { kraken.ohlc(1234.56) }.to raise_error(ArgumentError)
+          expect { kraken.ohlc({}) }.to raise_error(ArgumentError)
+          expect { kraken.ohlc([]) }.to raise_error(ArgumentError)
+        end
       end
     end
     
     context "using order_book()" do
       context "given no input" do
-        
+        it "throws an ArgumentError exception" do
+          expect { kraken.order_book }.to raise_error(ArgumentError)
+        end
       end
       
       context "given valid input" do
@@ -179,13 +215,20 @@ describe Kraken::Client do
       end
       
       context "given invalid input" do
-        
+        it "throws an ArgumentError exception" do
+          expect { kraken.order_book(1234) }.to raise_error(ArgumentError)
+          expect { kraken.order_book(1234.56) }.to raise_error(ArgumentError)
+          expect { kraken.order_book({}) }.to raise_error(ArgumentError)
+          expect { kraken.order_book([]) }.to raise_error(ArgumentError)
+        end
       end
     end
     
     context "using trades()" do
       context "given no input" do
-        
+        it "throws an ArgumentError exception" do
+          expect { kraken.trades }.to raise_error(ArgumentError)
+        end
       end
       
       context "given valid input" do
@@ -197,13 +240,20 @@ describe Kraken::Client do
       end
       
       context "given invalid input" do
-        
+        it "throws an ArgumentError exception" do
+          expect { kraken.trades(1234) }.to raise_error(ArgumentError)
+          expect { kraken.trades(1234.56) }.to raise_error(ArgumentError)
+          expect { kraken.trades({}) }.to raise_error(ArgumentError)
+          expect { kraken.trades([]) }.to raise_error(ArgumentError)
+        end
       end
     end
     
     context "using spread()" do
       context "given no input" do
-        
+        it "throws an ArgumentError exception" do
+          expect { kraken.spread }.to raise_error(ArgumentError)
+        end
       end
       
       context "given valid input" do
@@ -215,7 +265,12 @@ describe Kraken::Client do
       end
       
       context "given invalid input" do
-        
+        it "throws an ArgumentError exception" do
+          expect { kraken.spread(1234) }.to raise_error(ArgumentError)
+          expect { kraken.spread(1234.56) }.to raise_error(ArgumentError)
+          expect { kraken.spread({}) }.to raise_error(ArgumentError)
+          expect { kraken.spread([]) }.to raise_error(ArgumentError)
+        end
       end
     end
   end
