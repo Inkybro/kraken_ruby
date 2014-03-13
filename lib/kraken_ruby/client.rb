@@ -23,16 +23,27 @@ module Kraken
       get_public 'Time'
     end
 
-    def assets(opts={})
-      get_public 'Assets'
+    def assets(assets=nil, opts={})
+      if assets
+        raise ArgumentError if !assets.is_a?(String)
+        opts[:asset] = assets
+      end
+      get_public 'Assets', opts
     end
 
-    def asset_pairs(opts={})
+    def asset_pairs(asset_pairs=nil, opts={})
+      if asset_pairs
+        raise ArgumentError if !asset_pairs.is_a?(String)
+        opts[:pair] = asset_pairs
+      end
       get_public 'AssetPairs', opts
     end
 
-    def ticker(pairs) # takes string of comma delimited pairs
-      opts = { 'pair' => pairs }
+    def ticker(asset_pairs=nil, opts={}) # takes string of comma delimited pairs
+      if asset_pairs
+        raise ArgumentError if !asset_pairs.is_a?(String)
+        opts[:pair] = asset_pairs
+      end
       get_public 'Ticker', opts
     end
     
