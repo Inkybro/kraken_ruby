@@ -30,49 +30,101 @@ module Kraken
       get_public 'Time'
     end
 
-    def assets(assets=nil, opts={})
-      if assets
-        raise ArgumentError if !assets.is_a?(String)
-        opts[:asset] = assets
+    def assets(*args)
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
+      if !args.empty?
+        opts[:asset] = comma_delimit(*args)
       end
       get_public 'Assets', opts
     end
 
-    def asset_pairs(asset_pairs=nil, opts={})
-      if asset_pairs
-        raise ArgumentError if !asset_pairs.is_a?(String)
-        opts[:pair] = asset_pairs
+    def asset_pairs(*args)
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
+      if !args.empty?
+        args.each do |arg|
+          raise ArgumentError if !arg.is_a?(String) && !arg.is_a?(Symbol)
+        end
+        opts[:pair] = comma_delimit(*args)
       end
       get_public 'AssetPairs', opts
     end
 
-    def ticker(asset_pairs, opts={}) # takes string of comma delimited pairs
-      raise ArgumentError if !asset_pairs.is_a?(String)
-      opts[:pair] = asset_pairs
+    def ticker(*args)
+      raise ArgumentError if args.empty?
+      
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
+      args.each do |arg|
+        raise ArgumentError if !arg.is_a?(String) && !arg.is_a?(Symbol)
+      end
+      opts[:pair] = comma_delimit(*args)
       get_public 'Ticker', opts
     end
     
-    def ohlc(asset_pairs, opts={})
-      raise ArgumentError if !asset_pairs.is_a?(String)
-      opts[:pair] = asset_pairs
+    def ohlc(*args)
+      raise ArgumentError if args.empty? || args.count > 2
+      raise ArgumentError if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
+      raise ArgumentError if args.count == 2 && !args.last.is_a?(Hash)
+      
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
+      opts[:pair] = args.shift
       get_public 'OHLC', opts
     end
     
-    def order_book(asset_pairs, opts={})
-      raise ArgumentError if !asset_pairs.is_a?(String)
-      opts[:pair] = asset_pairs
+    def order_book(*args)
+      raise ArgumentError if args.empty? || args.count > 2
+      raise ArgumentError if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
+      raise ArgumentError if args.count == 2 && !args.last.is_a?(Hash)
+      
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
+      opts[:pair] = args.shift
       get_public 'Depth', opts
     end
 
-    def trades(asset_pairs, opts={})
-      raise ArgumentError if !asset_pairs.is_a?(String)
-      opts[:pair] = asset_pairs
+    def trades(*args)
+      raise ArgumentError if args.empty? || args.count > 2
+      raise ArgumentError if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
+      raise ArgumentError if args.count == 2 && !args.last.is_a?(Hash)
+      
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
+      opts[:pair] = args.shift
       get_public 'Trades', opts
     end
 
-    def spread(asset_pairs, opts={})
-      raise ArgumentError if !asset_pairs.is_a?(String)
-      opts[:pair] = asset_pairs
+    def spread(*args)
+      raise ArgumentError if args.empty? || args.count > 2
+      raise ArgumentError if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
+      raise ArgumentError if args.count == 2 && !args.last.is_a?(Hash)
+      
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
+      opts[:pair] = args.shift
       get_public 'Spread', opts
     end
 
@@ -91,33 +143,53 @@ module Kraken
       post_private 'Balance', {} #opts
     end
 
-    def trade_balance(assets=nil, opts={})
-      if assets
-        raise ArgumentError if !assets.is_a?(String)
-        opts[:asset] = assets
+    def trade_balance(*args)
+      raise ArgumentError if args.count > 2
+      raise ArgumentError if args.count == 2 && !args.last.is_a?(Hash)
+      
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
+      if args.first.is_a?(String) || args.first.is_a?(Symbol)
+        opts[:asset] = args.shift
       end
       post_private 'TradeBalance', opts
     end
 
-    def open_orders(opts={})
-      #if trades
-      #  raise ArgumentError if !(trades.is_a?(TrueClass) || trades.is_a?(FalseClass)) 
-      #  opts[:trades] = trades
-      #end
+    def open_orders(*args)
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
       post_private 'OpenOrders', opts
     end
     
-    def closed_orders(opts={})
-      #if trades
-      #  raise ArgumentError if !(trades.is_a?(TrueClass) || trades.is_a?(FalseClass)) 
-      #  opts[:trades] = trades
-      #end
+    def closed_orders(*args)
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
       post_private 'ClosedOrders', opts
     end
 
-    def query_orders(transaction_ids, opts={})
-      raise ArgumentError if !transaction_ids.is_a?(String)
-      opts[:txid] = transaction_ids
+    def query_orders(*args)
+      raise ArgumentError if args.empty? || args.first.is_a?(Hash)
+      
+      if args.last.is_a?(Hash)
+        opts = args.pop
+      else
+        opts = {}
+      end
+      if !args.empty?
+        args.each do |arg|
+          raise ArgumentError if !arg.is_a?(String) && !arg.is_a?(Symbol)
+        end
+        opts[:txid] = comma_delimit(*args)
+      end
       post_private 'QueryOrders', opts
     end
 
@@ -218,6 +290,23 @@ module Kraken
 
       def url_path(method)
         '/' + @api_version + '/private/' + method
+      end
+      
+      def arg_vals(*args)
+        
+      end
+      
+      def arg_opts(*args)
+        
+      end
+      
+      def comma_delimit(*values)
+        str = values.shift.to_s
+        values.each do |value|
+          raise ArgumentError if !value.is_a?(String) && !value.is_a?(Symbol)
+          str += ",#{value.to_s}"
+        end
+        str
       end
 
   end
