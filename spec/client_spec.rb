@@ -12,6 +12,11 @@ describe Kraken::Client do
     # Additionally, it makes the spec suite run MUCH faster, since
     # a nonce is not necessary for public requests.
     
+    # ^ SECOND FOLLOWUP TO THAT:
+    # i wrote a better nonce generator, that takes into account
+    # time on much smaller scales (perhaps like 1/1000th of a second).
+    # it seems to work fine.
+    
     #sleep 0.3 # to prevent rapidly pinging the Kraken server
   end
 
@@ -322,7 +327,34 @@ describe Kraken::Client do
           expect { kraken.trade_balance([]) }.to raise_error(ArgumentError)
         end
       end
-    end  
+    end
+    
+    context "using open_orders()" do
+      context "given no input" do
+        it "gets a list of the user's open orders" do
+          result = kraken.open_orders
+          expect(result).to be_instance_of(Hash)
+          expect(result[:open]).to be_instance_of(Hash)
+        end
+      end
+      
+      context "given valid input for 'trades'" do
+        it "gets a list of the user's open orders" do
+          result = kraken.open_orders(true)
+          expect(result).to be_instance_of(Hash)
+          expect(result[:open]).to be_instance_of(Hash)
+        end
+      end
+      
+      context "given invalid input for 'trades'" do
+        it "throws an ArgumentError exception" do
+          expect { kraken.open_orders(1234) }.to raise_error(ArgumentError)
+          expect { kraken.open_orders(1234.56) }.to raise_error(ArgumentError)
+          expect { kraken.open_orders({}) }.to raise_error(ArgumentError)
+          expect { kraken.open_orders([]) }.to raise_error(ArgumentError)
+        end
+      end
+    end 
   end
 
 end

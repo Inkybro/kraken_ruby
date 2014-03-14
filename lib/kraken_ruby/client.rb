@@ -92,7 +92,11 @@ module Kraken
       post_private 'TradeBalance', opts
     end
 
-    def open_orders(opts={})
+    def open_orders(trades=nil, opts={})
+      if trades
+        raise ArgumentError if !trades.is_a?(Boolean)
+        opts[:trades] = trades
+      end
       post_private 'OpenOrders', opts
     end
 
@@ -148,8 +152,6 @@ module Kraken
     private
 
       def post_private(method, opts={})
-        sleep 0.3
-        
         opts['nonce'] = nonce
         post_data = encode_options(opts)
 
@@ -164,7 +166,12 @@ module Kraken
       end
 
       def nonce
-        Time.now.to_i.to_s.ljust(16,'0')
+        # no need to sleep, pretty sure... just needed to take into account
+        # time on a smaller scale (hence Time.now.to_f * 10000). apparently
+        # .to_f on Time instances returns a fractional timestamp.
+        # this all ensures the numbers are increasing quickly enough to
+        # constitute a valid nonce.
+        (Time.now.to_f*100000).to_i.to_s.ljust(16,'0')
       end
 
       def encode_options(opts)
