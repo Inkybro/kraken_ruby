@@ -94,7 +94,7 @@ module Kraken
 
     def open_orders(trades=nil, opts={})
       if trades
-        raise ArgumentError if !trades.is_a?(Boolean)
+        raise ArgumentError if !(trades.is_a?(TrueClass) || trades.is_a?(FalseClass)) 
         opts[:trades] = trades
       end
       post_private 'OpenOrders', opts
@@ -162,7 +162,7 @@ module Kraken
 
         url = @base_uri + url_path(method)
         r = self.class.post(url, { headers: headers, body: post_data }).parsed_response
-        r['error'].empty? ? r['result'] : r['error']
+        r['error'].empty? ? Hashie::Mash.new(r['result']) : r['error']
       end
 
       def nonce
@@ -171,7 +171,7 @@ module Kraken
         # .to_f on Time instances returns a fractional timestamp.
         # this all ensures the numbers are increasing quickly enough to
         # constitute a valid nonce.
-        (Time.now.to_f*100000).to_i.to_s.ljust(16,'0')
+        (Time.now.to_f*10000000).to_i.to_s.ljust(16,'0')
       end
 
       def encode_options(opts)

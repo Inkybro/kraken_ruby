@@ -22,6 +22,15 @@ describe Kraken::Client do
 
   let(:kraken){ Kraken::Client.new(API_KEY, API_SECRET) }
   
+  it "generates valid nonces" do
+    last_nonce = 0
+    (1..1000).each do |n|
+      this_nonce = kraken.send(:nonce).to_i
+      expect(this_nonce).to be > last_nonce 
+      last_nonce = this_nonce
+    end
+  end
+  
   context "fetching public data" do
     context "using server_time()" do
       it "gets the correct time from Kraken" do
@@ -32,7 +41,7 @@ describe Kraken::Client do
         # a more reliable approach. 
         result = Time.parse(kraken.server_time.rfc1123)
         time_difference_in_seconds = (result-Time.now.getutc).abs
-        time_difference_in_seconds.should be < 3
+        expect(time_difference_in_seconds).to be < 3
       end
     end
     
@@ -287,7 +296,7 @@ describe Kraken::Client do
     context "using balance()" do
       context "given no input" do
         it "gets the user's balance(s) in ZUSD" do
-          expect(kraken.balance).to be_instance_of(Hash)
+          expect(kraken.balance).to be_instance_of(Hashie::Mash)
         end
       end
       
@@ -305,16 +314,16 @@ describe Kraken::Client do
     context "using trade_balance()" do
       context "given no input" do
         it "gets the user's trade balance(s) in ZUSD" do
-          expect(kraken.trade_balance).to be_instance_of(Hash)
+          expect(kraken.trade_balance).to be_instance_of(Hashie::Mash)
         end
       end
       
       context "given valid input" do
         it "gets the user's trade balance(s) in the specified asset" do
           zusd = kraken.trade_balance
-          expect(zusd).to be_instance_of(Hash)
+          expect(zusd).to be_instance_of(Hashie::Mash)
           xxdg = kraken.trade_balance('XXDG')
-          expect(xxdg).to be_instance_of(Hash)
+          expect(xxdg).to be_instance_of(Hashie::Mash)
           expect(zusd).not_to eq xxdg
         end
       end
@@ -330,19 +339,15 @@ describe Kraken::Client do
     end
     
     context "using open_orders()" do
-      context "given no input" do
+      context "given valid input" do
         it "gets a list of the user's open orders" do
           result = kraken.open_orders
-          expect(result).to be_instance_of(Hash)
-          expect(result[:open]).to be_instance_of(Hash)
-        end
-      end
-      
-      context "given valid input for 'trades'" do
-        it "gets a list of the user's open orders" do
+          expect(result).to be_instance_of(Hashie::Mash)
+          expect(result[:open]).to be_instance_of(Hashie::Mash)
+          
           result = kraken.open_orders(true)
-          expect(result).to be_instance_of(Hash)
-          expect(result[:open]).to be_instance_of(Hash)
+          expect(result).to be_instance_of(Hashie::Mash)
+          expect(result[:open]).to be_instance_of(Hashie::Mash)
         end
       end
       
