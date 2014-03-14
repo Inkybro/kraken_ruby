@@ -341,20 +341,43 @@ describe Kraken::Client do
           expect(result).to be_instance_of(Hashie::Mash)
           expect(result[:open]).to be_instance_of(Hashie::Mash)
           
-          result = kraken.open_orders(true)
-          expect(result).to be_instance_of(Hashie::Mash)
-          expect(result[:open]).to be_instance_of(Hashie::Mash)
+          #result = kraken.open_orders(true)
+          #expect(result).to be_instance_of(Hashie::Mash)
+          #expect(result[:open]).to be_instance_of(Hashie::Mash)
         end
       end
       
-      context "given invalid input for 'trades'" do
-        it "throws an ArgumentError exception" do
-          expect { kraken.open_orders(1234) }.to raise_error(ArgumentError)
-          expect { kraken.open_orders(1234.56) }.to raise_error(ArgumentError)
-          expect { kraken.open_orders({}) }.to raise_error(ArgumentError)
-          expect { kraken.open_orders([]) }.to raise_error(ArgumentError)
+      #context "given invalid input for 'trades'" do
+      #  it "throws an ArgumentError exception" do
+      #    expect { kraken.open_orders(1234) }.to raise_error(ArgumentError)
+      #    expect { kraken.open_orders(1234.56) }.to raise_error(ArgumentError)
+      #    expect { kraken.open_orders({}) }.to raise_error(ArgumentError)
+      #    expect { kraken.open_orders([]) }.to raise_error(ArgumentError)
+      #  end
+      #end
+    end
+    
+    context "using closed_orders()" do
+      context "given valid input" do
+        it "gets a list of the user's closed orders" do
+          result = kraken.closed_orders
+          expect(result).to be_instance_of(Hashie::Mash)
+          expect(result[:closed]).to be_instance_of(Hashie::Mash)
+          
+          #result = kraken.closed_orders(true)
+          #expect(result).to be_instance_of(Hashie::Mash)
+          #expect(result[:closed]).to be_instance_of(Hashie::Mash)
         end
       end
+      
+      #context "given invalid input for 'trades'" do
+      #  it "throws an ArgumentError exception" do
+      #    expect { kraken.open_orders(1234) }.to raise_error(ArgumentError)
+      #    expect { kraken.open_orders(1234.56) }.to raise_error(ArgumentError)
+      #    expect { kraken.open_orders({}) }.to raise_error(ArgumentError)
+      #    expect { kraken.open_orders([]) }.to raise_error(ArgumentError)
+      #  end
+      #end
     end
   end
   

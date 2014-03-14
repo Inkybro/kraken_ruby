@@ -99,12 +99,20 @@ module Kraken
       post_private 'TradeBalance', opts
     end
 
-    def open_orders(trades=nil, opts={})
-      if trades
-        raise ArgumentError if !(trades.is_a?(TrueClass) || trades.is_a?(FalseClass)) 
-        opts[:trades] = trades
-      end
+    def open_orders(opts={})
+      #if trades
+      #  raise ArgumentError if !(trades.is_a?(TrueClass) || trades.is_a?(FalseClass)) 
+      #  opts[:trades] = trades
+      #end
       post_private 'OpenOrders', opts
+    end
+    
+    def closed_orders(opts={})
+      #if trades
+      #  raise ArgumentError if !(trades.is_a?(TrueClass) || trades.is_a?(FalseClass)) 
+      #  opts[:trades] = trades
+      #end
+      post_private 'ClosedOrders', opts
     end
 
     def query_orders(opts={})
