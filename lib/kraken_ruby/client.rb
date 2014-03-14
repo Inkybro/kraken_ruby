@@ -14,6 +14,13 @@ module Kraken
       @api_version  = options[:version] ||= '0'
       @base_uri     = options[:base_uri] ||= 'https://api.kraken.com'
     end
+    
+    ###########################
+    ###### Fundamentals #######
+    ###########################
+    def api_version
+      @api_version
+    end
 
     ###########################
     ###### Public Data ########
@@ -23,31 +30,49 @@ module Kraken
       get_public 'Time'
     end
 
-    def assets(opts={})
-      get_public 'Assets'
+    def assets(assets=nil, opts={})
+      if assets
+        raise ArgumentError if !assets.is_a?(String)
+        opts[:asset] = assets
+      end
+      get_public 'Assets', opts
     end
 
-    def asset_pairs(opts={})
+    def asset_pairs(asset_pairs=nil, opts={})
+      if asset_pairs
+        raise ArgumentError if !asset_pairs.is_a?(String)
+        opts[:pair] = asset_pairs
+      end
       get_public 'AssetPairs', opts
     end
 
-    def ticker(pairs) # takes string of comma delimited pairs
-      opts = { 'pair' => pairs }
+    def ticker(asset_pairs, opts={}) # takes string of comma delimited pairs
+      raise ArgumentError if !asset_pairs.is_a?(String)
+      opts[:pair] = asset_pairs
       get_public 'Ticker', opts
     end
     
-    def order_book(pair, opts={})
-      opts['pair'] = pair
+    def ohlc(asset_pairs, opts={})
+      raise ArgumentError if !asset_pairs.is_a?(String)
+      opts[:pair] = asset_pairs
+      get_public 'OHLC', opts
+    end
+    
+    def order_book(asset_pairs, opts={})
+      raise ArgumentError if !asset_pairs.is_a?(String)
+      opts[:pair] = asset_pairs
       get_public 'Depth', opts
     end
 
-    def trades(pair, opts={})
-      opts['pair'] = pair
+    def trades(asset_pairs, opts={})
+      raise ArgumentError if !asset_pairs.is_a?(String)
+      opts[:pair] = asset_pairs
       get_public 'Trades', opts
     end
 
-    def spread(pair, opts={})
-      opts['pair'] = pair
+    def spread(asset_pairs, opts={})
+      raise ArgumentError if !asset_pairs.is_a?(String)
+      opts[:pair] = asset_pairs
       get_public 'Spread', opts
     end
 
@@ -62,19 +87,37 @@ module Kraken
     ##### Private Data ###
     ######################
 
-    def balance(opts={})
-      post_private 'Balance', opts
+    def balance#(opts={})
+      post_private 'Balance', {} #opts
     end
 
-    def trade_balance(opts={})
+    def trade_balance(assets=nil, opts={})
+      if assets
+        raise ArgumentError if !assets.is_a?(String)
+        opts[:asset] = assets
+      end
       post_private 'TradeBalance', opts
     end
 
     def open_orders(opts={})
+      #if trades
+      #  raise ArgumentError if !(trades.is_a?(TrueClass) || trades.is_a?(FalseClass)) 
+      #  opts[:trades] = trades
+      #end
       post_private 'OpenOrders', opts
     end
+    
+    def closed_orders(opts={})
+      #if trades
+      #  raise ArgumentError if !(trades.is_a?(TrueClass) || trades.is_a?(FalseClass)) 
+      #  opts[:trades] = trades
+      #end
+      post_private 'ClosedOrders', opts
+    end
 
-    def query_orders(opts={})
+    def query_orders(transaction_ids, opts={})
+      raise ArgumentError if !transaction_ids.is_a?(String)
+      opts[:txid] = transaction_ids
       post_private 'QueryOrders', opts
     end
 
@@ -117,6 +160,10 @@ module Kraken
       end
       post_private 'AddOrder', opts
     end
+    
+    def cancel_order(opts={})
+      # TODO: write me
+    end
 
     #######################
     #### Generate Signed ##
@@ -136,11 +183,16 @@ module Kraken
 
         url = @base_uri + url_path(method)
         r = self.class.post(url, { headers: headers, body: post_data }).parsed_response
-        r['error'].empty? ? r['result'] : r['error']
+        r['error'].empty? ? Hashie::Mash.new(r['result']) : r['error']
       end
 
       def nonce
-        Time.now.to_i.to_s.ljust(16,'0')
+        # no need to sleep, pretty sure... just needed to take into account
+        # time on a smaller scale (hence Time.now.to_f * 10000). apparently
+        # .to_f on Time instances returns a fractional timestamp.
+        # this all ensures the numbers are increasing quickly enough to
+        # constitute a valid nonce.
+        (Time.now.to_f*10000000).to_i.to_s.ljust(16,'0')
       end
 
       def encode_options(opts)
@@ -156,7 +208,7 @@ module Kraken
       end
 
       def generate_message(method, opts, data)
-        digest = OpenSSL::Digest.new('sha256', opts['nonce'] + data).digest
+        digest = OpenSSL::Digest.new('sha256', opts['nonce'].to_s + data).digest
         url_path(method) + digest
       end
 
