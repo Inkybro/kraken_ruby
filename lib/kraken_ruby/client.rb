@@ -14,6 +14,13 @@ module Kraken
       @api_version  = options[:version] ||= '0'
       @base_uri     = options[:base_uri] ||= 'https://api.kraken.com'
     end
+    
+    ###########################
+    ###### Fundamentals #######
+    ###########################
+    def api_version
+      @api_version
+    end
 
     ###########################
     ###### Public Data ########
@@ -187,7 +194,7 @@ module Kraken
       end
 
       def generate_message(method, opts, data)
-        digest = OpenSSL::Digest.new('sha256', opts['nonce'] + data).digest
+        digest = OpenSSL::Digest.new('sha256', opts['nonce'].to_s + data).digest
         url_path(method) + digest
       end
 

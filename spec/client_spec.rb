@@ -22,13 +22,9 @@ describe Kraken::Client do
 
   let(:kraken){ Kraken::Client.new(API_KEY, API_SECRET) }
   
-  it "generates valid nonces" do
-    last_nonce = 0
-    (1..1000).each do |n|
-      this_nonce = kraken.send(:nonce).to_i
-      expect(this_nonce).to be > last_nonce 
-      last_nonce = this_nonce
-    end
+  it "returns the API version being used" do
+    expect(kraken).to respond_to :api_version
+    expect(kraken.api_version).to eq kraken.instance_eval { @api_version }
   end
   
   context "fetching public data" do
@@ -359,7 +355,62 @@ describe Kraken::Client do
           expect { kraken.open_orders([]) }.to raise_error(ArgumentError)
         end
       end
-    end 
+    end
+  end
+  
+  context "signing/making private post requests" do
+    it "makes post requests" do
+      # no idea how to test this, besides,
+      # it's just not worth it, I think.
+    end
+    
+    # This test is better than the rest in this context.
+    # It should remain.
+    it "generates nonces" do
+      last_nonce = 0
+      (1..1000).each do |n|
+        this_nonce = kraken.send(:nonce).to_i
+        expect(this_nonce).to be > last_nonce 
+        last_nonce = this_nonce
+      end
+    end
+    
+    # This test isnt really necessary. I'm sure Addressable has a suite,
+    # so really it was just kind of redundant. 
+    it "encodes option hashes" do
+      opts = {:a => 1, :b => 2, :c => 3}
+      expect(kraken.send(:encode_options, opts)).to eq 'a=1&b=2&c=3'
+    end
+    
+    # The below tests are something like above:
+    # Maybe a little redundant and/or unnecessary.
+    # Especially with the following three, dealing w/
+    # SSL encryption, etc. I wouldn't even know where
+    # to begin REALLY testing it. All of the following
+    # 3 tests are based on the output I got, running
+    # the exact same commands in IRB. So, they can't 
+    # really be called tests :P
+    # Anyway, who knows, maybe one day it'll be nice
+    # to have them here, there could come a time when
+    # somebody may want to expand on these aspects.
+    it "generates signatures" do
+      opts = { 'nonce' => '123456789' }
+      expect(kraken.send(:generate_signature, 'SomeMethod', 'abc', {'nonce'=>'123456789'})).to eq 'YYpKKS5wFGPUW36Hb7SuMOxHwtq7lp8Do6DMyiHgy5FWBKRlOvxlYs43lJjYYK9S8gwYpoh/ZuHs59ArJMLCPg=='
+    end
+    
+    it "generates messages" do
+      opts = { 'nonce' => '123456789' }
+      expect(kraken.send(:generate_message, 'SomeMethod', opts, 'abc')).to eq "/0/private/SomeMethodC\x90\x87H-!\xD5u\x84\xB6\xD1\xA2l\xC9\xE3\x84N\xD7\\6\xF3<\x0FyR\x04*\xB0A+$\x05"
+    end
+    
+    it "generates hmacs" do
+      expect(kraken.send(:generate_hmac, 'abc', '123')).to eq 'G7R6Lghr+rOobjhD/9Zl/q2Q8O9GzyiUxWoZT7GBWGhen9NkveAI1fLLBOZJxzlq3aONxWF6ndVquYGSCuExiA=='
+    end
+    
+    # Pretty much, again, the same. A little unnecessary.
+    it "generates url paths" do
+      expect(kraken.send(:url_path, 'SomeMethod')).to eq "/#{kraken.api_version}/private/SomeMethod"
+    end
   end
 
 end
