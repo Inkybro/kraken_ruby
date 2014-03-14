@@ -197,7 +197,6 @@ describe Kraken::Client do
           expect(result).to respond_to :XLTCXXDG
           expect(result.XLTCXXDG).to be_instance_of(Array)
           expect(result).to respond_to :last
-          #expect(result.last).to be_instance_of(Fixnum)
         end
       end
       
@@ -288,22 +287,10 @@ describe Kraken::Client do
     end
   end
 
-  context "fetching private data" do # More tests to come
+  context "fetching private data" do
     context "using balance()" do
-      context "given no input" do
-        it "gets the user's balance(s) in ZUSD" do
-          expect(kraken.balance).to be_instance_of(Hashie::Mash)
-        end
-      end
-      
-      context "given any input" do
-        # although the API doc says that you are able to specify
-        # 'asset' (base asset used to determine balance, default ZUSD),
-        # it seems not to make any difference, so for now, I'm just going
-        # entirely disable passing arguments.
-        it "throws an ArgumentError exception" do
-          expect { kraken.balance({:asset => 'XLTCXXDG'}) }.to raise_error(ArgumentError)
-        end
+      it "gets the user's balance(s) in ZUSD" do
+        expect(kraken.balance).to be_instance_of(Hashie::Mash)
       end
     end
     
@@ -335,49 +322,152 @@ describe Kraken::Client do
     end
     
     context "using open_orders()" do
-      context "given valid input" do
-        it "gets a list of the user's open orders" do
-          result = kraken.open_orders
-          expect(result).to be_instance_of(Hashie::Mash)
-          expect(result[:open]).to be_instance_of(Hashie::Mash)
-          
-          #result = kraken.open_orders(true)
-          #expect(result).to be_instance_of(Hashie::Mash)
-          #expect(result[:open]).to be_instance_of(Hashie::Mash)
-        end
+      it "gets a list of the user's open orders" do
+        result = kraken.open_orders
+        expect(result).to be_instance_of(Hashie::Mash)
+        expect(result[:open]).to be_instance_of(Hashie::Mash)
       end
-      
-      #context "given invalid input for 'trades'" do
-      #  it "throws an ArgumentError exception" do
-      #    expect { kraken.open_orders(1234) }.to raise_error(ArgumentError)
-      #    expect { kraken.open_orders(1234.56) }.to raise_error(ArgumentError)
-      #    expect { kraken.open_orders({}) }.to raise_error(ArgumentError)
-      #    expect { kraken.open_orders([]) }.to raise_error(ArgumentError)
-      #  end
-      #end
     end
     
     context "using closed_orders()" do
-      context "given valid input" do
-        it "gets a list of the user's closed orders" do
-          result = kraken.closed_orders
-          expect(result).to be_instance_of(Hashie::Mash)
-          expect(result[:closed]).to be_instance_of(Hashie::Mash)
-          
-          #result = kraken.closed_orders(true)
-          #expect(result).to be_instance_of(Hashie::Mash)
-          #expect(result[:closed]).to be_instance_of(Hashie::Mash)
+      it "gets a list of the user's closed orders" do
+        result = kraken.closed_orders
+        expect(result).to be_instance_of(Hashie::Mash)
+        expect(result[:closed]).to be_instance_of(Hashie::Mash)
+      end
+    end
+    
+    context "using query_orders()" do
+      context "given no input" do
+        it "throws an ArgumentError exception" do
+          expect { kraken.query_orders }.to raise_error(ArgumentError)
         end
       end
       
-      #context "given invalid input for 'trades'" do
-      #  it "throws an ArgumentError exception" do
-      #    expect { kraken.open_orders(1234) }.to raise_error(ArgumentError)
-      #    expect { kraken.open_orders(1234.56) }.to raise_error(ArgumentError)
-      #    expect { kraken.open_orders({}) }.to raise_error(ArgumentError)
-      #    expect { kraken.open_orders([]) }.to raise_error(ArgumentError)
-      #  end
-      #end
+      context "given valid input" do
+        it "gets a list of the queried orders" do
+          # TODO: write me
+        end
+      end
+      
+      context "given invalid input" do
+        it "only accepts a String for 'transaction_ids'" do
+          expect { kraken.query_orders(1234) }.to raise_error(ArgumentError)
+          expect { kraken.query_orders(1234.56) }.to raise_error(ArgumentError)
+          expect { kraken.query_orders({}) }.to raise_error(ArgumentError)
+          expect { kraken.query_orders([]) }.to raise_error(ArgumentError)
+        end
+        
+        it "only allows <= 20 orders to be queried" do
+          # TODO: write me
+        end
+      end
+    end
+    
+    context "using trade_history()" do
+      it "gets a list of the trade history" do
+        # TODO: write me
+      end
+    end
+    
+    context "using query_trades()" do
+      context "given no input" do
+        it "throws an ArgumentError exception" do
+          # TODO: write me
+        end
+      end
+      
+      context "given valid input" do
+        it "gets a list of the queried trades" do
+          # TODO: write me
+        end
+      end
+      
+      context "given invalid input" do
+        it "only accepts a String for 'transaction_ids'" do
+          # TODO: write me
+        end
+        
+        it "only allows <= 20 trades to be queried" do
+          # TODO: write me
+        end
+      end
+    end
+    
+    context "using open_positions()" do
+      context "given no input" do
+        # TODO: write me
+      end
+      
+      context "given valid input" do
+        it "gets a list of the user's open positions" do
+          # TODO: write me
+        end
+      end
+      
+      context "given invalid input" do
+        it "requires the 'transaction_ids' argument to be specified" do
+          # TODO: write me
+        end
+        
+        it "only accepts Strings for 'transaction_ids'" do
+          # TODO: write me
+        end
+      end
+    end
+    
+    context "using ledgers_info()" do
+      it "gets a list of ledgers info" do
+        # TODO: write me
+      end
+    end
+    
+    context "using query_ledgers()" do
+      context "given valid input" do
+        it "gets a list of the queried ledgers" do
+          # TODO: write me
+        end
+      end
+      
+      context "given invalid input" do
+        it "requires the 'ledger_ids' argument" do
+          # TODO: write me
+        end
+        
+        it "only accepts a String for 'ledger_ids'" do
+          # TODO: write me
+        end
+        
+        it "only allows <= 20 ledgers to be queried" do
+          # TODO: write me
+        end
+      end
+    end
+    
+    context "using trade_volume()" do
+      context "given valid input" do
+        it "gets a list of trade volumes" do
+          # TODO: write me
+        end
+        
+        it "gets a list of trade volumes (only) for specified asset pairs" do
+          # TODO: write me
+        end
+      end
+      
+      context "given invalid input" do
+        # TODO: write me (maybe not necessary)
+      end
+    end
+  end
+  
+  context "conducting private user trading" do
+    context "using add_order()" do
+      # TODO: write me
+    end
+    
+    context "using cancel_order()" do
+      # TODO: write me
     end
   end
   

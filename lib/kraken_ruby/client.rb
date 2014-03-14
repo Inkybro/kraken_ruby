@@ -115,7 +115,9 @@ module Kraken
       post_private 'ClosedOrders', opts
     end
 
-    def query_orders(opts={})
+    def query_orders(transaction_ids, opts={})
+      raise ArgumentError if !transaction_ids.is_a?(String)
+      opts[:txid] = transaction_ids
       post_private 'QueryOrders', opts
     end
 
@@ -157,6 +159,10 @@ module Kraken
         end
       end
       post_private 'AddOrder', opts
+    end
+    
+    def cancel_order(opts={})
+      # TODO: write me
     end
 
     #######################
