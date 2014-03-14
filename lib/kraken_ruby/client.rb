@@ -31,11 +31,9 @@ module Kraken
     end
 
     def assets(*args)
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
+      raise ArgumentError if !args_only_strings?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
       if !args.empty?
         opts[:asset] = comma_delimit(*args)
       end
@@ -43,87 +41,51 @@ module Kraken
     end
 
     def asset_pairs(*args)
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
+      raise ArgumentError if !args_only_strings?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
       if !args.empty?
-        args.each do |arg|
-          raise ArgumentError if !arg.is_a?(String) && !arg.is_a?(Symbol)
-        end
         opts[:pair] = comma_delimit(*args)
       end
       get_public 'AssetPairs', opts
     end
 
     def ticker(*args)
-      raise ArgumentError if args.empty?
-      
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
-      args.each do |arg|
-        raise ArgumentError if !arg.is_a?(String) && !arg.is_a?(Symbol)
-      end
+      raise ArgumentError if args.empty? || !args_only_strings?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
       opts[:pair] = comma_delimit(*args)
       get_public 'Ticker', opts
     end
     
     def ohlc(*args)
-      raise ArgumentError if args.empty? || args.count > 2
-      raise ArgumentError if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
-      raise ArgumentError if args.count == 2 && !args.last.is_a?(Hash)
-      
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
+      raise ArgumentError if !single_string_arg?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
       opts[:pair] = args.shift
       get_public 'OHLC', opts
     end
     
     def order_book(*args)
-      raise ArgumentError if args.empty? || args.count > 2
-      raise ArgumentError if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
-      raise ArgumentError if args.count == 2 && !args.last.is_a?(Hash)
-      
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
+      raise ArgumentError if !single_string_arg?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
       opts[:pair] = args.shift
       get_public 'Depth', opts
     end
 
     def trades(*args)
-      raise ArgumentError if args.empty? || args.count > 2
-      raise ArgumentError if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
-      raise ArgumentError if args.count == 2 && !args.last.is_a?(Hash)
-      
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
+      raise ArgumentError if !single_string_arg?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
       opts[:pair] = args.shift
       get_public 'Trades', opts
     end
 
     def spread(*args)
-      raise ArgumentError if args.empty? || args.count > 2
-      raise ArgumentError if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
-      raise ArgumentError if args.count == 2 && !args.last.is_a?(Hash)
-      
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
+      raise ArgumentError if !single_string_arg?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
       opts[:pair] = args.shift
       get_public 'Spread', opts
     end
@@ -292,12 +254,36 @@ module Kraken
         '/' + @api_version + '/private/' + method
       end
       
-      def arg_vals(*args)
-        
+      #FUNDAMENTAL TASKS:
+      
+      def args_only_strings?(*args)
+        args = arg_vals(*args)
+        args.each do |arg|
+          return false if !arg.is_a?(String) && !arg.is_a?(Symbol)
+        end
+        true
+      end
+      
+      def single_string_arg?(*args)
+        args = arg_vals(*args)
+        return false if args.count < 1 || args.count > 1
+        return false if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
+        true
       end
       
       def arg_opts(*args)
-        
+        if args.last.is_a?(Hash)
+          args.pop
+        else
+          {}
+        end
+      end
+      
+      def arg_vals(*args)
+        if args.last.is_a?(Hash)
+          args.pop
+        end
+        args
       end
       
       def comma_delimit(*values)

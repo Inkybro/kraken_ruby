@@ -478,19 +478,56 @@ describe Kraken::Client do
     end
   end
   
-  context "fundamentally" do
-    it "extracts string/symbol parameters from *args" do
-      
+  context "handling fundamental tasks" do
+    context "using args_only_strings?()" do
+      it "verifies that *args are all strings or symbols" do
+        expect(kraken.send(:args_only_strings?, :a, :b, 'c', :d, 'e')).to eq true
+        expect(kraken.send(:args_only_strings?, :a, :b, 'c', :d, 'e', {:abc => 123})).to eq true
+        expect(kraken.send(:args_only_strings?, :a, :b, 'c', 1, 2.3)).to eq false
+        expect(kraken.send(:args_only_strings?, :a, :b, 'c', {}, [])).to eq false
+      end
     end
     
-    it "extracts opts hash from *args" do
-      
+    context "using single_string_arg?()" do
+      it "verifies that only a SINGLE string or symbol was passed" do
+        expect(kraken.send(:single_string_arg?, :a)).to eq true
+        expect(kraken.send(:single_string_arg?, :a, {:abc => 123})).to eq true
+        expect(kraken.send(:single_string_arg?, 'b')).to eq true
+        expect(kraken.send(:single_string_arg?, 'b', {:abc => 123})).to eq true
+        expect(kraken.send(:single_string_arg?, :a, 'b')).to eq false
+        expect(kraken.send(:single_string_arg?, 'a', :b, {:abc => 123})).to eq false
+        expect(kraken.send(:single_string_arg?, 1)).to eq false
+        expect(kraken.send(:single_string_arg?, 1, 2.3)).to eq false
+        expect(kraken.send(:single_string_arg?, 1, 2.3, {})).to eq false
+        expect(kraken.send(:single_string_arg?, [], {})).to eq false
+        expect(kraken.send(:single_string_arg?, {}, [])).to eq false
+      end
     end
     
-    it "comma-delimits strings" do
-      expect(kraken.send(:comma_delimit, :a, :b, :c)).to eq 'a,b,c'
+    context "using arg_vals()" do
+      it "extracts string/symbol parameters from *args" do
+        expect(kraken.send(:arg_vals, :a, :b, :c, {:abc => 123})).to be_instance_of(Array)
+        expect(kraken.send(:arg_vals, :a, :b, :c, {:abc => 123})).to eq [:a, :b, :c]
+      end
     end
     
+    context "using arg_opts()" do
+      it "extracts opts hash from *args" do
+        expect(kraken.send(:arg_opts, :a, :b, :c, {:abc => 123})).to be_instance_of(Hash)
+        expect(kraken.send(:arg_opts, :a, :b, :c, {:abc => 123}).count).to eq 1
+        expect(kraken.send(:arg_opts, :a, :b, :c, {:abc => 123})[:abc]).to eq 123
+        expect(kraken.send(:arg_opts, :a, :b, :c)).to be_instance_of(Hash)
+        expect(kraken.send(:arg_opts, :a, :b, :c).count).to eq 0
+      end
+    end
+    
+    context "using comma_delimit()" do
+      it "comma-delimits strings" do
+        expect(kraken.send(:comma_delimit, :a, :b, :c)).to eq 'a,b,c'
+      end
+    end
+    
+    # TODO: contextualize the following methods
     it "encodes option hashes" do
       opts = {:a => 1, :b => 2, :c => 3}
       expect(kraken.send(:encode_options, opts)).to eq 'a=1&b=2&c=3'
