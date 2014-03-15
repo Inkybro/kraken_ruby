@@ -51,10 +51,14 @@ module Kraken
     end
 
     def ticker(*args)
-      raise ArgumentError if args.empty? || !args_only_strings?(*args)
+      raise ArgumentError if !args_only_strings?(*args)
       opts = arg_opts(*args)
       args = arg_vals(*args)
-      opts[:pair] = comma_delimit(*args)
+      if !args.empty?
+        opts[:pair] = comma_delimit(*args)
+      else
+        raise ArgumentError
+      end
       get_public 'Ticker', opts
     end
     
@@ -62,7 +66,11 @@ module Kraken
       raise ArgumentError if !single_string_arg?(*args)
       opts = arg_opts(*args)
       args = arg_vals(*args)
-      opts[:pair] = args.shift
+      if !args.empty?
+        opts[:pair] = args.shift
+      else
+        raise ArgumentError
+      end
       get_public 'OHLC', opts
     end
     
@@ -70,7 +78,11 @@ module Kraken
       raise ArgumentError if !single_string_arg?(*args)
       opts = arg_opts(*args)
       args = arg_vals(*args)
-      opts[:pair] = args.shift
+      if !args.empty?
+        opts[:pair] = args.shift
+      else
+        raise ArgumentError
+      end
       get_public 'Depth', opts
     end
 
@@ -78,7 +90,11 @@ module Kraken
       raise ArgumentError if !single_string_arg?(*args)
       opts = arg_opts(*args)
       args = arg_vals(*args)
-      opts[:pair] = args.shift
+      if !args.empty?
+        opts[:pair] = args.shift
+      else
+        raise ArgumentError
+      end
       get_public 'Trades', opts
     end
 
@@ -86,7 +102,11 @@ module Kraken
       raise ArgumentError if !single_string_arg?(*args)
       opts = arg_opts(*args)
       args = arg_vals(*args)
-      opts[:pair] = args.shift
+      if !args.empty?
+        opts[:pair] = args.shift
+      else
+        raise ArgumentError
+      end
       get_public 'Spread', opts
     end
 
@@ -101,85 +121,93 @@ module Kraken
     ##### Private Data ###
     ######################
 
-    def balance#(opts={})
-      post_private 'Balance', {} #opts
+    def balance
+      post_private 'Balance', {}
     end
 
     def trade_balance(*args)
-      raise ArgumentError if args.count > 2
-      raise ArgumentError if args.count == 2 && !args.last.is_a?(Hash)
-      
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
-      if args.first.is_a?(String) || args.first.is_a?(Symbol)
-        opts[:asset] = args.shift
-      end
+      raise ArgumentError if args.count > 2 || !single_string_arg?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
+      opts[:asset] = args.shift
       post_private 'TradeBalance', opts
     end
 
     def open_orders(*args)
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
+      opts = arg_opts(*args)
       post_private 'OpenOrders', opts
     end
     
     def closed_orders(*args)
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
+      opts = arg_opts(*args)
       post_private 'ClosedOrders', opts
     end
 
     def query_orders(*args)
-      raise ArgumentError if args.empty? || args.first.is_a?(Hash)
-      
-      if args.last.is_a?(Hash)
-        opts = args.pop
-      else
-        opts = {}
-      end
-      if !args.empty?
-        args.each do |arg|
-          raise ArgumentError if !arg.is_a?(String) && !arg.is_a?(Symbol)
-        end
+      raise ArgumentError if args.empty? || !args_only_strings?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
+      if args.count >= 1 && args.count <= 20
         opts[:txid] = comma_delimit(*args)
+      else
+        raise ArgumentError
       end
       post_private 'QueryOrders', opts
     end
 
-    def trade_history(opts={})
+    def trade_history(*args)
+      opts = arg_opts(*args)
       post_private 'TradesHistory', opts
     end
 
-    def query_trades(tx_ids, opts={})
-      opts['txid'] = tx_ids
+    def query_trades(*args)
+      raise ArgumentError if args.empty? || !args_only_strings?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
+      if args.count >= 1 && args.count <= 20
+        opts[:txid] = comma_delimit(*args)
+      else
+        raise ArgumentError
+      end
       post_private 'QueryTrades', opts
     end
 
-    def open_positions(tx_ids, opts={})
-      opts['txid'] = tx_ids
+    def open_positions(*args)
+      raise ArgumentError if args.empty? || !args_only_strings?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
+      if args.count >= 1
+        opts[:txid] = comma_delimit(*args)
+      else
+        raise ArgumentError
+      end
       post_private 'OpenPositions', opts
     end
 
-    def ledgers_info(opts={})
+    def ledgers_info(*args)
+      opts = arg_opts(*args)
       post_private 'Ledgers', opts
     end
 
-    def query_ledgers(ledger_ids, opts={})
-      opts['id'] = ledger_ids
+    def query_ledgers(*args)
+      raise ArgumentError if args.empty? || !args_only_strings?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
+      if args.count >= 1 && args.count <= 20
+        opts[:id] = comma_delimit(*args)
+      else
+        raise ArgumentError
+      end
       post_private 'QueryLedgers', opts
     end
 
-    def trade_volume(asset_pairs)
-      opts['pair'] = asset_pairs
+    def trade_volume(*args)
+      raise ArgumentError if !args_only_strings?(*args)
+      opts = arg_opts(*args)
+      args = arg_vals(*args)
+      if !args.empty?
+        opts[:pair] = comma_delimit(*args)
+      end
       post_private 'TradeVolume', opts
     end
 
@@ -221,11 +249,6 @@ module Kraken
       end
 
       def nonce
-        # no need to sleep, pretty sure... just needed to take into account
-        # time on a smaller scale (hence Time.now.to_f * 10000). apparently
-        # .to_f on Time instances returns a fractional timestamp.
-        # this all ensures the numbers are increasing quickly enough to
-        # constitute a valid nonce.
         (Time.now.to_f*10000000).to_i.to_s.ljust(16,'0')
       end
 
@@ -266,8 +289,11 @@ module Kraken
       
       def single_string_arg?(*args)
         args = arg_vals(*args)
-        return false if args.count < 1 || args.count > 1
-        return false if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
+        if args.count > 1
+          return false
+        elsif args.count == 1
+          return false if !args.first.is_a?(String) && !args.first.is_a?(Symbol)
+        end
         true
       end
       
@@ -287,6 +313,7 @@ module Kraken
       end
       
       def comma_delimit(*values)
+        values = arg_vals(*values)
         str = values.shift.to_s
         values.each do |value|
           raise ArgumentError if !value.is_a?(String) && !value.is_a?(Symbol)

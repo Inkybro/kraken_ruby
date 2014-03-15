@@ -316,154 +316,128 @@ describe Kraken::Client do
     
     context "using query_orders()" do
       it "gets queried orders" do
-      end
-      
-      it "must be passed a set of transaction IDs" do
-        expect { kraken.ticker }.to raise_error(ArgumentError)
-        expect { kraken.ticker({:abc => 123}) }.to raise_error(ArgumentError)
-      end
-      
-      it "must be passed a set of "
-      
-      it "only accepts string/symbol values as asset pairs" do
-        expect { kraken.ticker(:XLTCXXDG, 'XLTCXXRP')}.not_to raise_error#(ArgumentError)
-        expect { kraken.ticker(1234) }.to raise_error(ArgumentError)
-        expect { kraken.ticker([]) }.to raise_error(ArgumentError)
-        expect { kraken.ticker(:XLTCXXDG, 1234) }.to raise_error(ArgumentError)
-        expect { kraken.ticker([], :XLTCXXRP) }.to raise_error(ArgumentError)
-      end
-      
-      it "only allows valid asset pairs" do
-        # TODO: implement w/ regex: /(?:X(?:LTC|X(?:DG|BT|RP|VN)|NMC)|Z(?:EUR|GBP|KRW|USD))/ix
-      end
-      
-      
-      it "gets queried orders" do
         # TODO: write me
       end
       
-      it "must be passed at least 1 transaction ID" do
-        
+      it "must be passed a set of 1-20 transaction IDs" do
+        expect { kraken.query_orders }.to raise_error(ArgumentError)
+        expect { kraken.query_orders({:abc => 123}) }.to raise_error(ArgumentError)
+        expect { kraken.query_orders(:a) }.not_to raise_error
+        expect { kraken.query_orders(:a, {:abc => 123}) }.not_to raise_error
+        expect { kraken.query_orders(:a,:b,:c,:d,:e,:f,:g,:h,:i,:j,:k,:l,:m,:n,:o,:p,:q,:r,:s,:t) }.not_to raise_error
+        expect { kraken.query_orders(:a,:b,:c,:d,:e,:f,:g,:h,:i,:j,:k,:l,:m,:n,:o,:p,:q,:r,:s,:t,:u) }.to raise_error(ArgumentError)
       end
       
-      it "accepts no more than 20 transaction IDs" do
+      it "only accepts string/symbol values as transaction IDs" do
+        expect { kraken.query_orders(1) }.to raise_error(ArgumentError)
+        expect { kraken.query_orders(:a, 2) }.to raise_error(ArgumentError)
+        expect { kraken.query_orders({}, []) }.to raise_error(ArgumentError)
+      end
+      
+      it "only allows valid transaction IDs" do
         # TODO: write me
-      end
-      
-      
-      context "given no input" do
-        it "throws an ArgumentError exception" do
-          expect { kraken.query_orders }.to raise_error(ArgumentError)
-        end
-      end
-      
-      context "given valid input" do
-        
-      end
-      
-      context "given invalid input" do
-        it "only accepts a String for 'transaction_ids'" do
-          expect { kraken.query_orders(1234) }.to raise_error(ArgumentError)
-          expect { kraken.query_orders(1234.56) }.to raise_error(ArgumentError)
-          expect { kraken.query_orders({}) }.to raise_error(ArgumentError)
-          expect { kraken.query_orders([]) }.to raise_error(ArgumentError)
-        end
       end
     end
     
     context "using trade_history()" do
       it "gets a list of the trade history" do
         # TODO: write me
+        # FIXME: I can't play w/ this enough in IRB -- using it gives me 'Invalid Nonce' every time.
       end
     end
     
     context "using query_trades()" do
-      context "given no input" do
-        it "throws an ArgumentError exception" do
-          # TODO: write me
-        end
+      it "gets queried trades" do
+        # TODO: write me
       end
       
-      context "given valid input" do
-        it "gets a list of the queried trades" do
-          # TODO: write me
-        end
+      it "must be passed a set of 1-20 transaction IDs" do
+        expect { kraken.query_trades }.to raise_error(ArgumentError)
+        expect { kraken.query_trades({:abc => 123}) }.to raise_error(ArgumentError)
+        expect { kraken.query_trades(:a) }.not_to raise_error
+        expect { kraken.query_trades(:a, {:abc => 123}) }.not_to raise_error
+        expect { kraken.query_trades(:a,:b,:c,:d,:e,:f,:g,:h,:i,:j,:k,:l,:m,:n,:o,:p,:q,:r,:s,:t) }.not_to raise_error
+        expect { kraken.query_trades(:a,:b,:c,:d,:e,:f,:g,:h,:i,:j,:k,:l,:m,:n,:o,:p,:q,:r,:s,:t,:u) }.to raise_error(ArgumentError)
       end
       
-      context "given invalid input" do
-        it "only accepts a String for 'transaction_ids'" do
-          # TODO: write me
-        end
-        
-        it "only allows <= 20 trades to be queried" do
-          # TODO: write me
-        end
+      it "only accepts string/symbol values as transaction IDs" do
+        expect { kraken.query_trades(1) }.to raise_error(ArgumentError)
+        expect { kraken.query_trades(:a, 2) }.to raise_error(ArgumentError)
+        expect { kraken.query_trades({}, []) }.to raise_error(ArgumentError)
+      end
+      
+      it "only allows valid transaction IDs" do
+        # TODO: write me
       end
     end
     
     context "using open_positions()" do
-      context "given no input" do
+      it "gets a list of the user's open positions" do
         # TODO: write me
       end
       
-      context "given valid input" do
-        it "gets a list of the user's open positions" do
-          # TODO: write me
-        end
+      it "must be passed a set of >=1 transaction IDs" do
+        expect { kraken.open_positions }.to raise_error(ArgumentError)
+        expect { kraken.open_positions({:abc => 123}) }.to raise_error(ArgumentError)
+        expect { kraken.open_positions(:a) }.not_to raise_error
+        expect { kraken.open_positions(:a, {:abc => 123}) }.not_to raise_error
+        expect { kraken.open_positions(:a,:b,:c,) }.not_to raise_error
+        expect { kraken.open_positions(:a,:b,:c, {:abc => 123}) }.not_to raise_error
       end
       
-      context "given invalid input" do
-        it "requires the 'transaction_ids' argument to be specified" do
-          # TODO: write me
-        end
-        
-        it "only accepts Strings for 'transaction_ids'" do
-          # TODO: write me
-        end
+      it "only accepts string/symbol values as transaction IDs" do
+        expect { kraken.open_positions(1) }.to raise_error(ArgumentError)
+        expect { kraken.open_positions(:a, 2) }.to raise_error(ArgumentError)
+        expect { kraken.open_positions({}, []) }.to raise_error(ArgumentError)
       end
     end
     
     context "using ledgers_info()" do
       it "gets a list of ledgers info" do
         # TODO: write me
+        # FIXME: I can't play w/ this enough in IRB -- using it gives me 'Invalid Nonce' every time.
       end
     end
     
     context "using query_ledgers()" do
-      context "given valid input" do
-        it "gets a list of the queried ledgers" do
-          # TODO: write me
-        end
+      it "gets a list of the queried ledgers" do
+        # TODO: write me
       end
       
-      context "given invalid input" do
-        it "requires the 'ledger_ids' argument" do
-          # TODO: write me
-        end
-        
-        it "only accepts a String for 'ledger_ids'" do
-          # TODO: write me
-        end
-        
-        it "only allows <= 20 ledgers to be queried" do
-          # TODO: write me
-        end
+      it "must be passed a set of 1-20 ledger IDs" do
+        expect { kraken.query_ledgers }.to raise_error(ArgumentError)
+        expect { kraken.query_ledgers({:abc => 123}) }.to raise_error(ArgumentError)
+        expect { kraken.query_ledgers(:a) }.not_to raise_error
+        expect { kraken.query_ledgers(:a, {:abc => 123}) }.not_to raise_error
+        expect { kraken.query_ledgers(:a,:b,:c,:d,:e,:f,:g,:h,:i,:j,:k,:l,:m,:n,:o,:p,:q,:r,:s,:t) }.not_to raise_error
+        expect { kraken.query_ledgers(:a,:b,:c,:d,:e,:f,:g,:h,:i,:j,:k,:l,:m,:n,:o,:p,:q,:r,:s,:t,:u) }.to raise_error(ArgumentError)
+      end
+      
+      it "only accepts string/symbol values as ledger IDs" do
+        expect { kraken.query_ledgers(1) }.to raise_error(ArgumentError)
+        expect { kraken.query_ledgers(:a, 2) }.to raise_error(ArgumentError)
+        expect { kraken.query_ledgers({}, []) }.to raise_error(ArgumentError)
+      end
+      
+      it "only allows valid ledger IDS" do
+        # TODO: write me
       end
     end
     
     context "using trade_volume()" do
-      context "given valid input" do
-        it "gets a list of trade volumes" do
-          # TODO: write me
-        end
-        
-        it "gets a list of trade volumes (only) for specified asset pairs" do
-          # TODO: write me
-        end
+      it "gets a list of trade volumes" do
+        # TODO: write me
       end
       
-      context "given invalid input" do
-        # TODO: write me (maybe not necessary)
+      it "only accepts string/symbol values as the asset pair" do
+        expect { kraken.trade_volume(:XLTCXXDG) }.not_to raise_error
+        expect { kraken.trade_volume('XLTCXXRP') }.not_to raise_error
+        expect { kraken.trade_volume(1234) }.to raise_error(ArgumentError)
+        expect { kraken.trade_volume([]) }.to raise_error(ArgumentError)
+      end
+      
+      it "only allows valid asset pairs" do
+        # TODO: implement w/ regex: /(?:X(?:LTC|X(?:DG|BT|RP|VN)|NMC)|Z(?:EUR|GBP|KRW|USD))/ix
       end
     end
   end
